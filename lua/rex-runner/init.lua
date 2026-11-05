@@ -71,11 +71,18 @@ end
 
 function M.detach() runner = nil end
 
+local function title(b)
+  local out = rex("block", "call", "-b", b.block_id, "title")
+  local t = out and vim.json.decode(out).title or ""
+  return t ~= "" and t or b.block_id:sub(-6)
+end
+
 function M.attach()
   local others = vim.tbl_filter(function(b) return b.block_id ~= vim.env.REX_BLOCK end, blocks())
+  for _, b in ipairs(others) do b.title = title(b) end
   vim.ui.select(others, {
     prompt = "Attach runner to pane",
-    format_item = function(b) return b.label .. "  " .. b.block_id:sub(-6) end,
+    format_item = function(b) return b.label .. "  " .. b.title end,
   }, function(b) if b then runner = b.block_id end end)
 end
 
